@@ -26,6 +26,7 @@ namespace TastyRestaurant.Api
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStatusCodePages();
             app.UseMvc();
         }
     }
