@@ -8,7 +8,7 @@ using TastyRestaurant.Api.Models;
 namespace TastyRestaurant.Api.Controllers
 {
     [ApiController]//in charge of the validation of ModelState. If a rule is invalid a bad request is sent automatically
-    [Route("api/cities/{cityId}/restaurant")]   
+    [Route("api/cities/{cityId}/restaurant")]
     public class RestaurantController : ControllerBase
     {
         [HttpGet]
@@ -29,8 +29,8 @@ namespace TastyRestaurant.Api.Controllers
             if (city == null) return NotFound();
 
             var restaurant = city.Restaurants.FirstOrDefault(r => r.Id == id);
-            
-            if(restaurant == null) return NotFound();
+
+            if (restaurant == null) return NotFound();
 
             return Ok(restaurant);
         }
@@ -38,7 +38,7 @@ namespace TastyRestaurant.Api.Controllers
         [HttpPost]
         public IActionResult CreationRestaurant(int cityId, [FromBody] RestaurantForCreationDto restaurant)
         {
-           if(restaurant.Description == restaurant.Name)
+            if (restaurant.Description == restaurant.Name)
             {
                 ModelState.AddModelError("Description", "The provided description should be different from the name");
             }
@@ -47,7 +47,7 @@ namespace TastyRestaurant.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
             if (city == null) return NotFound();
@@ -67,6 +67,35 @@ namespace TastyRestaurant.Api.Controllers
                 "GetRestaurantById",
                 new { cityId, id = finalRestaurant.Id },
                 finalRestaurant);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult UpdatedRestaurant(int cityId, int id, 
+                                            [FromBody] RestaurantForUpdateDto restaurant)
+        {
+            if (restaurant.Description == restaurant.Name)
+            {
+                ModelState.AddModelError("Description", "The provided description should be different from the name");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null) return NotFound();
+
+            var restaurantFromStore = city.Restaurants.FirstOrDefault(r => r.Id == id);
+
+            if (restaurantFromStore == null) return NotFound();
+
+            restaurantFromStore.Name = restaurant.Name;
+            restaurantFromStore.Description = restaurant.Description;
+
+            return NoContent();//most common for update
+
         }
     }
 }
