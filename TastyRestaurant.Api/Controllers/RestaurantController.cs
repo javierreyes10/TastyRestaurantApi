@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,5 +98,60 @@ namespace TastyRestaurant.Api.Controllers
             return NoContent();//most common for update
 
         }
+
+        [HttpPatch("{id}")]
+        public IActionResult PartiallyUpdateRestaurant(int cityId, int id,
+            [FromBody] JsonPatchDocument<RestaurantForUpdateDto> patchDoc)
+        {
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null) return NotFound();
+
+            var restaurantFromStore = city.Restaurants.FirstOrDefault(r => r.Id == id);
+
+            if (restaurantFromStore == null) return NotFound();
+
+            var restaurantToPatch = new RestaurantForUpdateDto
+            {
+                Name = restaurantFromStore.Name,
+                Description = restaurantFromStore.Description
+            };
+
+            patchDoc.ApplyTo(restaurantToPatch, ModelState);
+
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            if (restaurantToPatch.Description == restaurantToPatch.Name)
+            {
+                ModelState.AddModelError("Description", "The provided description should be different from the name");
+            }
+
+            if (!TryValidateModel(restaurantToPatch))
+            {
+                return BadRequest(ModelState);
+            }
+
+            restaurantFromStore.Name = restaurantToPatch.Name;
+            restaurantFromStore.Description = restaurantToPatch.Description;
+
+            return NoContent();//most common for update
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteRestaurant(int cityId, int id)
+        {
+            var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
+
+            if (city == null) return NotFound();
+
+            var restaurantFromStore = city.Restaurants.FirstOrDefault(r => r.Id == id);
+
+            if (restaurantFromStore == null) return NotFound();
+
+            city.Restaurants.Remove(restaurantFromStore);
+
+            return NoContent();
+        }
     }
 }
+  
