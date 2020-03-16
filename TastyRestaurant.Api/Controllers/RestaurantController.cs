@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TastyRestaurant.Api.Models;
+using TastyRestaurant.Api.Services;
 
 namespace TastyRestaurant.Api.Controllers
 {
@@ -13,11 +14,14 @@ namespace TastyRestaurant.Api.Controllers
     [Route("api/cities/{cityId}/restaurant")]
     public class RestaurantController : ControllerBase
     {
-        private ILogger<RestaurantController> _logger;
+        private readonly ILogger<RestaurantController> _logger;
+        private readonly IMailService _mailService;
 
-        public RestaurantController(ILogger<RestaurantController> logger)
+        public RestaurantController(ILogger<RestaurantController> logger,
+                                    IMailService mailService)
         {
             _logger = logger;
+            _mailService = mailService;
         }
 
         [HttpGet]
@@ -160,6 +164,8 @@ namespace TastyRestaurant.Api.Controllers
             if (restaurantFromStore == null) return NotFound();
 
             city.Restaurants.Remove(restaurantFromStore);
+
+            _mailService.Send("Deletion Complete", $"A restauran with id {id} has been deleted");
 
             return NoContent();
         }
