@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,22 @@ namespace TastyRestaurant.Api.Controllers
     [Route("api/cities/{cityId}/restaurant")]
     public class RestaurantController : ControllerBase
     {
+        private ILogger<RestaurantController> _logger;
+
+        public RestaurantController(ILogger<RestaurantController> logger)
+        {
+            _logger = logger;
+        }
+
         [HttpGet]
         public IActionResult GetRestaurants(int cityId)
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(c => c.Id == cityId);
 
-            if (city == null) return NotFound();
+            if (city == null) {
+                _logger.LogInformation($"The city {cityId} was not found");
+                return NotFound();
+            }
 
             return Ok(city.Restaurants);
         }
