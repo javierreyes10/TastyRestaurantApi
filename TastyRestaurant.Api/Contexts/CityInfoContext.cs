@@ -10,7 +10,7 @@ namespace TastyRestaurant.Api.Contexts
 
         public CityInfoContext(DbContextOptions<CityInfoContext> options) : base(options)
         {
-            Database.EnsureCreated();
+            //Database.EnsureCreated();
         }
     }
 }

@@ -5,9 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using TastyRestaurant.Api.Contexts;
 
 namespace TastyRestaurant.Api
 {
@@ -20,7 +23,18 @@ namespace TastyRestaurant.Api
             try
             {
                 logger.Info("Initializing application...");
-                CreateWebHostBuilder(args).Build().Run();
+                var host = CreateWebHostBuilder(args).Build();
+
+                using (var scope = host.Services.CreateScope())
+                {
+                    var context = scope.ServiceProvider.GetService<CityInfoContext>();
+                    //For demo purposes, delete & migrate on startup so
+                    //we can start with a clean state
+                    context.Database.EnsureDeleted();
+                    context.Database.Migrate();
+                }
+
+                host.Run();
             }
             catch (Exception ex)
             {
