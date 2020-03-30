@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using TastyRestaurant.Api.Contexts;
 using TastyRestaurant.Api.Services;
 
 namespace TastyRestaurant.Api
@@ -60,6 +62,13 @@ namespace TastyRestaurant.Api
 #else
             services.AddTransient<IMailService, CloudMailService>();
 #endif
+            var connectionString = @"Server=(localdb)\MSSQLLocalDB;DataBase=CityInfoDb;Trusted_Connection=True";
+
+            services.AddDbContext<CityInfoContext>(o =>
+            {
+
+                o.UseSqlServer(connectionString);
+            }); 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
